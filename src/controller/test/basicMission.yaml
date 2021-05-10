@@ -1,0 +1,40 @@
+nodes:
+  - node: 1
+    name: Airplane inspection
+    type: control_flow
+    subtype: sequence
+    parent: 0
+
+  - node: 2
+    name: Despegue
+    type: execution
+    subtype: task
+    task: TAKE_OFF
+    wait_for_completion: false
+    parent: 1
+  
+  - node: 3
+    name: Camino
+    type: execution
+    subtype: task
+    task: FOLLOW_PATH
+    parameters: "path: [  [0, 0, 1] ,  [1, 0, 1] , [1, 1, 1],[0,0,1] ]"
+    wait_for_completion: false
+    parent: 1
+
+  - node: 4
+    name: Rota
+    type: execution
+    subtype: task
+    task: ROTATE
+    parameters: "angle: 180"
+    wait_for_completion: false
+    parent: 1
+
+  - node: 5
+    name: Aterriza
+    type: execution
+    subtype: task
+    task: LAND
+    wait_for_completion: false
+    parent: 1

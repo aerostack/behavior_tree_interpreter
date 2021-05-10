@@ -1,0 +1,38 @@
+nodes:
+  - node: 1
+    name: Airplane inspection
+    type: control_flow
+    subtype: sequence
+    parent: 0
+
+  - node: 2
+    name: Despegue
+    type: execution
+    subtype: task
+    task: TAKE_OFF
+    wait_for_completion: false
+    parent: 1
+
+  - node: 3
+    name: Añade
+    type: execution
+    subtype: add_belief
+    parameters: "name(2, drone120)"
+    multivalued: true
+    parent: 1
+
+  - node: 4
+    name: Aterriza
+    type: execution
+    subtype: task
+    task: LAND
+    wait_for_completion: false
+    parent: 1
+
+  - node: 5
+    name: Elimina
+    type: execution
+    subtype: remove_belief
+    parameters: "name(2, drone120)"
+    parent: 1
+

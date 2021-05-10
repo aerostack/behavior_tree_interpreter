@@ -1,0 +1,47 @@
+nodes:
+  - node: 1
+    name: Airplane inspection
+    type: control_flow
+    subtype: sequence
+    parent: 0
+
+  - node: 2
+    name: Despegue
+    type: execution
+    subtype: task
+    task: TAKE_OFF
+    wait_for_completion: false
+    parent: 1
+
+  - node: 3
+    name: Variables
+    type: execution
+    subtype: query_belief
+    parameters: "position(?R,(?X,?Y,?Z))"
+    parent: 1
+
+  - node: 4
+    name: Camino
+    type: execution
+    subtype: task
+    task: FOLLOW_PATH
+    parameters: "path: [  [2,2,2] ]"
+    wait_for_completion: false
+    parent: 1
+    
+  - node: 5
+    name: Camino
+    type: execution
+    subtype: task
+    task: FOLLOW_PATH
+    parameters: "path: [[+X,+Y,+Z]]"
+    wait_for_completion: false
+    parent: 1
+
+  - node: 6
+    name: Aterriza
+    type: execution
+    subtype: task
+    task: LAND
+    wait_for_completion: false
+    parent: 1
