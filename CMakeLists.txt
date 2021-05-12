@@ -34,8 +34,8 @@ set(BEHAVIORTREEINTERPRETER_SOURCE_FILES
 
 set(CMAKE_AUTOMOC ON)
 
-find_package(catkin REQUIRED COMPONENTS droneMsgsROS rviz roscpp image_transport aerostack_msgs behavior_execution_manager_msgs behavior_coordinator_msgs cv_bridge std_msgs geometry_msgs angles lib_pugixml)
-catkin_package(INCLUDE_DIRS ${BEHAVIORTREEINTERPRETER_INCLUDE_DIR} ${BEHAVIORTREEINTERPRETER_INCLUDE_DIR} CATKIN_DEPENDS angles lib_pugixml DEPENDS yaml-cpp)
+find_package(catkin REQUIRED COMPONENTS droneMsgsROS rviz roscpp image_transport aerostack_msgs behavior_execution_manager_msgs behavior_coordinator_msgs cv_bridge std_msgs geometry_msgs angles pugixml)
+catkin_package(INCLUDE_DIRS ${BEHAVIORTREEINTERPRETER_INCLUDE_DIR} ${BEHAVIORTREEINTERPRETER_INCLUDE_DIR} CATKIN_DEPENDS angles pugixml DEPENDS yaml-cpp)
 
 include_directories(${BEHAVIORTREEINTERPRETER_INCLUDE_DIR})
 include_directories(${BEHAVIORTREEINTERPRETER_CONTROLLER_INCLUDE_DIR})
