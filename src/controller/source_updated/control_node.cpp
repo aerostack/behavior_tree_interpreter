@@ -42,4 +42,16 @@ BT::ControlNode::ControlNode(std::string name,QPixmap icono_pixmap) : TreeNode::
 }
 BT::ControlNode::~ControlNode() {}
 
-
+void BT::ControlNode::resetStatus(BT::TreeNode* node)
+{
+  node->setStatus(BT::NON_INITIATED);
+  std::vector<BT::TreeNode*> nodes =node->getChildren();
+  for(int i=0 ; i<nodes.size() ; i++)
+  {
+    if(!nodes[i]->getChildren().empty())
+    {
+      resetStatus(nodes[i]);
+    }
+    nodes[i]->setStatus(BT::NON_INITIATED);
+  }
+}

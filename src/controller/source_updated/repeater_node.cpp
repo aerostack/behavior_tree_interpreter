@@ -1,5 +1,7 @@
 /*!********************************************************************************
- * \brief     This is the header of the control_node class 
+ * \brief     This is the repeater_node class, this is a control node that  
+ *            returns success if the child returns failure and returns
+ *            failure if the child returns success
  * \authors   Oscar Cabrera
  * \copyright Copyright (c) 2020 Universidad Politecnica de Madrid
  *
@@ -27,25 +29,65 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-#ifndef CONTROL_NODE_H
-#define CONTROL_NODE_H
 
-#include <tree_node.h>
-
-#include <vector>
+#include <repeater_node.h>
 #include <string>
-#include <global.h>
 
-namespace BT
-{
-  class ControlNode : public TreeNode
-  {
-    protected:
-      ReturnStatus execution_result;
-      void resetStatus(BT::TreeNode* node);
-    public:
-      ControlNode(std::string name,QPixmap icono_pixmap);
-      ~ControlNode();
-  };
+BT::RepeaterNode::RepeaterNode(std::string name,int iterations, QPixmap icono_pixmap) : ControlNode::ControlNode(name, icono_pixmap) {
+  action=REPEATER;
+  this->iterations=iterations;
 }
-#endif
+
+BT::RepeaterNode::~RepeaterNode() {}
+
+BT::ReturnStatus BT::RepeaterNode::executeStep()
+{
+  
+  setColor(COLOR_BLUE);
+  number_of_children=children.size();
+  
+  for(int i=0 ; i<number_of_children ; i++)
+  {
+    BT::ReturnStatus execution_result=children[i]->executeStep();
+    switch (execution_result)
+    {
+      //if it is the last children and it succeed we set the node to SUCCESFUL_COMPLETION
+      case BT::SUCCESSFUL_COMPLETION:
+        //cause we execute at the start we do times-1 iterations
+        if(iterations==1)
+        {
+          setColor(COLOR_GREEN);
+          setStatus(BT::SUCCESSFUL_COMPLETION);
+          return BT::SUCCESSFUL_COMPLETION;
+        }
+        else
+        {
+          resetStatus(children[i]);
+          iterations--;
+          return BT::RUNNING;
+        }
+      
+      break;
+    
+      case BT::FAILURE_COMPLETION:
+        setColor(COLOR_RED);
+        setStatus(BT::FAILURE_COMPLETION);
+        return BT::FAILURE_COMPLETION;
+        break;
+
+      case BT::RUNNING:
+        setStatus(BT::RUNNING);
+        return BT::RUNNING;
+        break;
+     
+      case BT::PAUSED:
+        setStatus(BT::PAUSED);
+        return BT::PAUSED;
+        break;
+      //default es aborted
+      default:
+        break;
+    }
+ }
+ return BT::SUCCESSFUL_COMPLETION;
+}

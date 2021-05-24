@@ -144,6 +144,7 @@ void BT::BehaviorTree::execute(BT::TreeNode* root, int TickPeriod_milliseconds)
 	}
 	if(status==BT::FAILURE_COMPLETION)
 	{
+	  std::cout << "ha fallado \n";
 	  stopMission=true;
 	  Q_EMIT(missionFinishedFailure());
 	}

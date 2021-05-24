@@ -1,5 +1,5 @@
 /*!********************************************************************************
- * \brief     This is the header of the control_node class 
+ * \brief     This is the header of the repeater_node class 
  * \authors   Oscar Cabrera
  * \copyright Copyright (c) 2020 Universidad Politecnica de Madrid
  *
@@ -27,25 +27,23 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-#ifndef CONTROL_NODE_H
-#define CONTROL_NODE_H
+#ifndef REPEATER_NODE_H
+#define REPEATER_NODE_H
 
-#include <tree_node.h>
-
-#include <vector>
+#include <control_node.h>
 #include <string>
-#include <global.h>
 
 namespace BT
 {
-  class ControlNode : public TreeNode
-  {
-    protected:
-      ReturnStatus execution_result;
-      void resetStatus(BT::TreeNode* node);
-    public:
-      ControlNode(std::string name,QPixmap icono_pixmap);
-      ~ControlNode();
-  };
+class RepeaterNode : public ControlNode
+{
+public:
+  explicit RepeaterNode(std::string name, int iterations, QPixmap icono_pixmap);
+  ~RepeaterNode();
+  
+  BT::ReturnStatus executeStep();
+private:
+ int iterations;
+};
 }
 #endif

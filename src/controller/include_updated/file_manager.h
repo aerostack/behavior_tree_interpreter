@@ -33,6 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include "tree_node.h"
+#include "parallel_node.h"
 #include <QTextEdit>
 #include "behavior_tree.h"
 #include "yaml-cpp/yaml.h"
@@ -50,6 +51,10 @@ class FileManager
       bool loadConfiguration(std::string file_path);
       std::vector<std::string> getBehaviors();
       bool checkParameters(std::string task, std::string parameters);
+      // 0->childNumber is ok
+      // 1-> control nodes designed for one child have two or more children
+      // 2-> parallel node threshold is greater that the number of children
+      int checkChildNumber(std::map<int, BT::TreeNode*> m,std::map<int, int> map_parent);
     private:
       std::string drone_id_namespace;
       std::string behavior_catalog_path;

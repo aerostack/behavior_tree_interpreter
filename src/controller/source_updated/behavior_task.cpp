@@ -56,11 +56,10 @@ BT::BehaviorTask::~BehaviorTask(){}
 BT::ReturnStatus BT::BehaviorTask::executeStep()
 {
   
-  if(status==NON_INITIATED || status==BT::FAILURE_COMPLETION ) 
+  if(status==NON_INITIATED || status==BT::FAILURE_COMPLETION) 
   {
     setColor(COLOR_BLUE);
     itemPaused=this;
-    //sleep(2);
     /*If activation_result.ack=true the service was succcesfully launched but it is not completed
     * until we recieved the confirmation from the callback function
     */
@@ -76,7 +75,6 @@ BT::ReturnStatus BT::BehaviorTask::executeStep()
       status=FAILURE_COMPLETION;
     }
   }
-  
   return status;
 }
 
@@ -127,7 +125,6 @@ behavior_coordinator_msgs::StartTask::Response BT::BehaviorTask::activateBehavio
     }
   }
   behavior.priority=task_priority;
-  std::cout<<behavior.parameters<<"\n";
   activate_task_srv=n.serviceClient<behavior_coordinator_msgs::StartTask>("/"+drone_id_namespace+"/"+task);
   /*We call the service start task and add this node to the vector of running nodes in order to
   * the callback function can track this node and change its status when the task ends  
@@ -160,7 +157,6 @@ std::string BT::BehaviorTask::substitutionVariables(std::string parameters)
 {
   std::string substitution=parameters;
   std::string aux1,aux2;
-  std::cout << substitution << "\n";
   for(int i=0 ; i<substitution.size()  ; i++)
   {
     if(substitution[i]=='+')
@@ -175,6 +171,5 @@ std::string BT::BehaviorTask::substitutionVariables(std::string parameters)
       substitution=aux1;
     }
   }
-  std::cout<<substitution<<"\n";
   return substitution;
 }

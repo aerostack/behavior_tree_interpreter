@@ -237,14 +237,17 @@ void BehaviorTreeControl::setStartBlockingTextInput()//this is used at the begin
 }
 
 void BehaviorTreeControl::setStopBlockingTextInput() //this is used at the end of the mission.
-{
-  if (visualState!=2 && visualState!=3 && visualState!=6){
+{ 
+  if(visualState!=1)
+  {
+    if (visualState!=2 && visualState!=3 && visualState!=6){
     lastVisualState=9;
     visualState=9;
     changeVisual();
     lastVisualState=0;
     visualState=0;
     changeVisual();
+    }
   }
   if (visualState==6 )
   {
@@ -254,13 +257,14 @@ void BehaviorTreeControl::setStopBlockingTextInput() //this is used at the end o
   {
     tree->connectCustomContextMenu();
   }
+    
   beliefs_text->setReadOnly(false);
 
- if (visualState!=-1 )
- {
+  if (visualState!=-1 )
+  {
     missionStateMsgs.data=false;
     mission_state_publ.publish(missionStateMsgs);
- }
+  }
    
 }
 void BehaviorTreeControl::addTextVariables()
@@ -527,19 +531,23 @@ void BehaviorTreeControl::pauseMission(){
   
   if (!pause_continue_changer)
   { 
-    std::cout << "pausamos mision \n";
+    //pause mission
     stopMission=true;
     lastVisualState=visualState;
     tree->connectCustomContextMenu();
+    //change visual to paused
     visualState=3;
     changeVisual();
     pause_continue_changer= true;
+    beliefs_text->setReadOnly(false);
+
 
     if(tree->isRunning())
     {
       BT::BehaviorTree * myTree = this->tree;
       tree->setRunning(false);  
       myTree->cancelTree();
+      std::cout << "item paused" << itemPaused->getName() << " no iniciado \n";
       itemPaused->setStatus(BT::NON_INITIATED);
       itemPaused->setColor(COLOR_GRAY);
       paused=true;
@@ -549,12 +557,15 @@ void BehaviorTreeControl::pauseMission(){
   }
   else
   {
+    //add variables and stop the input
+    beliefs_text->setReadOnly(true);
     addTextVariables();
+    //change visual state
     lastVisualState=visualState;
     visualState=6;
     changeVisual();
     pause_continue_changer= false;
-    
+    //execute the tree
     doneFirst=false;
     Q_EMIT(executionStarted());
     stopMission=false;
@@ -564,13 +575,14 @@ void BehaviorTreeControl::pauseMission(){
     missionStateMsgs.data=true;
     mission_state_publ.publish(missionStateMsgs);
     
+    
   }  
 }
 
 
 void BehaviorTreeControl::abortTreeMission()
 { 
-  std::cout << "aborto mision \n";
+  //set abort true and stop mission
   aborted=true;
   stopMission=true;
   if(tree->isRunning())
@@ -580,12 +592,15 @@ void BehaviorTreeControl::abortTreeMission()
     myTree->cancelTree();
     tree->connectCustomContextMenu();
   }
+  //paint respective node and allow variables input
   itemPaused->setColor(COLOR_PURPLE);
   resetTreeStatus(root_node);
   lastVisualState= visualState;
   visualState=2;
   variables->deleteVariables();
   cleanVariableText();
+  beliefs_text->setReadOnly(false);
+
   changeVisual();
   
 }
@@ -603,13 +618,17 @@ void BehaviorTreeControl::completedMission()
 }
 void BehaviorTreeControl::missionFailed()
 {
+  std::cout << visualState << "\n";
   mission_failed=true;
   resetTreeStatus(root_node);
   tree->connectCustomContextMenu();
+
+  std::cout << visualState << "\n";
   setStopBlockingTextInput();
   variables->deleteVariables();
   cleanVariableText();
 
+  std::cout << visualState << "\n";
 }
 
 void BehaviorTreeControl::cleanTree(){//this method changes the state of the nodes to the non initiated state in order to repeat the mission
@@ -652,7 +671,9 @@ void BehaviorTreeControl::deletePauseNode()
   {
     if(!running_nodes[i]->getName().compare(itemPaused->getName()))
     { 
-      std::cout << "borrando" << running_nodes[i]->getName() << "\n"; 
+      std::cout << running_nodes[i]->getName() << "\n";
+      BT::TreeNode* node=running_nodes[i];
+      std::cout << node->getName() << "\n";
       running_nodes.erase(running_nodes.begin()+i);
     }
   }
@@ -1155,14 +1176,13 @@ void BehaviorTreeControl::keyReleaseEvent(QKeyEvent *e)
 void BehaviorTreeControl::CallbackBehaviorActivationFinished(const behavior_coordinator_msgs::TaskStopped &msg)
 { 
   int termination_cause=msg.termination_cause;
-
   for(int i=0; i<running_nodes.size(); i++)
   {
     BT::BehaviorTask * node = (BT::BehaviorTask *) running_nodes[i];
     if(!node->getTaskName().compare(msg.name) && node->getStatus()==BT::RUNNING)
     {
       //termination_cause=1 --> GOAL_ACHIEVED
-      if(termination_cause==1 )
+      if(termination_cause==behavior_coordinator_msgs::TaskStopped::GOAL_ACHIEVED )
       {
         running_nodes[i]->setStatus(BT::SUCCESSFUL_COMPLETION);
 		    running_nodes[i]->setColor(COLOR_GREEN);
@@ -1170,8 +1190,9 @@ void BehaviorTreeControl::CallbackBehaviorActivationFinished(const behavior_coor
       }
       else
       {
-        if(termination_cause!=5)
+        if(termination_cause!=behavior_coordinator_msgs::TaskStopped::INTERRUPTED)  
         {
+          std::cout << "esta coloreando por esto?"<< running_nodes[i]->getName()<<termination_cause<<"\n";
           running_nodes[i]->setStatus(BT::FAILURE_COMPLETION);
           running_nodes[i]->setColor(COLOR_RED);
           running_nodes.erase(running_nodes.begin()+i);

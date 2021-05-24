@@ -11,6 +11,11 @@
 #include "query_belief.h"
 #include "sequence_node.h"
 #include "fallback_node.h"
+#include "inverter_node.h"
+#include "parallel_node.h"
+#include "repeat_until_fail_node.h"
+#include "repeater_node.h"
+#include "succeeder_node.h"
 #include <string>
 
 BT::TreeNode::TreeNode(std::string name,QPixmap icono_pixmap) : QTreeWidgetItem()
@@ -153,29 +158,50 @@ std::string BT::TreeNode::nodeActionToString(BT::NodeAction node)
   switch (node)
   {
     case BT::NodeAction::ADD_BELIEF:
-	{
-	  return "ADD_BELIEF";
-	}
-	case BT::NodeAction::BEHAVIOR_TASK:
-	{
-	  return "TASK";
-	}
+	  {
+	    return "ADD_BELIEF";
+	  }
+	  case BT::NodeAction::BEHAVIOR_TASK:
+	  {
+	    return "TASK";
+  	}
     case BT::NodeAction::FALLBACK_NODE:
-	{
-	  return "FALLBACK";
-	}
+	  {
+	    return "FALLBACK";
+	  }
     case BT::NodeAction::QUERY_BELIEF:
-	{
-	  return "QUERY_BELIEF";
-	}
+	  {
+	    return "QUERY_BELIEF";
+	  }
     case BT::NodeAction::REMOVE_BELIEF:
-	{
-	  return "REMOVE_BELIEF";
-	}
+	  {
+	    return "REMOVE_BELIEF";
+	  }
     case BT::NodeAction::SEQUENCE_NODE:
-	{
-	  return "SEQUENCE";
-	}
+	  {
+	    return "SEQUENCE";
+	  }
+    case BT::NodeAction::INVERTER:
+    {
+      return "INVERTER";
+    }
+    case BT::NodeAction::PARALLEL:
+    {
+      return "PARALLEL";
+    }
+    case BT::NodeAction::REPEATER:
+    {
+      return "REPEATER";
+    }
+    case BT::NodeAction::REPEAT_UNTIL_FAIL:
+    {
+      return "REPEAT_UNTIL_FAIL";
+    }
+    case BT::NodeAction::SUCCEEDER:
+    {
+      return "SUCCEEDER";
+    }
+      
   }
 }
 
@@ -210,6 +236,26 @@ BT::NodeAction BT::TreeNode::stringToNodeAction(std::string str)
   {
 	return NodeAction::SEQUENCE_NODE;
   }
+  if (str == "INVERTER") 
+  {
+	return NodeAction::INVERTER;
+  }
+  if (str == "PARALLEL") 
+  {
+	return NodeAction::PARALLEL;
+  }
+  if (str == "REPEATER") 
+  {
+	return NodeAction::REPEATER;
+  }
+  if (str == "REPEAT_UNTIL_FAIL") 
+  {
+	return NodeAction::REPEAT_UNTIL_FAIL;
+  }
+  if (str == "SUCCEEDER") 
+  {
+	return NodeAction::SUCCEEDER;
+  }
 }
 
 std::string BT::TreeNode::statusToString(ReturnStatus status)
@@ -243,7 +289,7 @@ std::string BT::TreeNode::statusToString(ReturnStatus status)
 }
 
 BT::TreeNode* BT::TreeNode::modifyNode(std::string name, BT::NodeType type, BT::NodeAction subtype, 
-  std::string task, std::string parameters, bool multivalued)
+  std::string task, std::string parameters, bool multivalued,int times,int threshold)
 {
   QPixmap icono_pixmap = QPixmap(":/images/images/action.png");
   switch (subtype)
@@ -291,7 +337,7 @@ BT::TreeNode* BT::TreeNode::modifyNode(std::string name, BT::NodeType type, BT::
 	case BT::NodeAction::SEQUENCE_NODE:
 	{
 	  icono_pixmap = QPixmap(":/images/images/sequence.png");
-      SequenceNode* node=new SequenceNode(name, icono_pixmap);
+    SequenceNode* node=new SequenceNode(name, icono_pixmap);
 	  node->partial_node_name = " [Execute all actions in sequence until one fails]";
 	  
 	  return node;
@@ -301,6 +347,46 @@ BT::TreeNode* BT::TreeNode::modifyNode(std::string name, BT::NodeType type, BT::
 	  icono_pixmap = QPixmap(":/images/images/selector.png");
 	  FallbackNode* node=new FallbackNode(name, icono_pixmap);
 	  node->partial_node_name = " [Execute all actions in sequence until one succeeds]";
+
+	  return node;
+	}
+  case BT::NodeAction::INVERTER:
+	{
+	  icono_pixmap = QPixmap(":/images/images/inverter.png");
+	  InverterNode* node=new InverterNode(name, icono_pixmap);
+	  node->partial_node_name = " [Inverts the result of the child node]";
+
+	  return node;
+	}
+  case BT::NodeAction::PARALLEL:
+	{
+	  icono_pixmap = QPixmap(":/images/images/parallel.png");
+	  ParallelNode* node=new ParallelNode(name,threshold, icono_pixmap);
+	  node->partial_node_name = " [Execute all actions in sequence until one succeeds]";
+
+	  return node;
+	}
+  case BT::NodeAction::REPEATER:
+	{
+	  icono_pixmap = QPixmap(":/images/images/loop.png");
+	  RepeaterNode* node=new RepeaterNode(name,times, icono_pixmap);
+	  node->partial_node_name = " [Execute all actions in sequence in a loop until "+ std::to_string(times) + " iterations are executed]";
+
+	  return node;
+	}
+  case BT::NodeAction::REPEAT_UNTIL_FAIL:
+	{
+	  icono_pixmap = QPixmap(":/images/images/loop.png");
+	  RepeatFailNode* node=new RepeatFailNode(name, icono_pixmap);
+	  node->partial_node_name = " [Execute all actions in sequence in a loop until one fails]";
+
+	  return node;
+	}
+  case BT::NodeAction::SUCCEEDER:
+	{
+	  icono_pixmap = QPixmap(":/images/images/succeeder.png");
+	  SucceederNode* node=new SucceederNode(name, icono_pixmap);
+	  node->partial_node_name = " [Always succeeds]";
 
 	  return node;
 	}

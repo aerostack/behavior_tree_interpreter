@@ -1,5 +1,6 @@
 /*!********************************************************************************
- * \brief     This is the header of the control_node class 
+ * \brief     This is the repeat_until_fail_node class, this is a control node that  
+ *            executes the children until one of them fails.
  * \authors   Oscar Cabrera
  * \copyright Copyright (c) 2020 Universidad Politecnica de Madrid
  *
@@ -27,25 +28,54 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-#ifndef CONTROL_NODE_H
-#define CONTROL_NODE_H
 
-#include <tree_node.h>
-
-#include <vector>
+#include <repeat_until_fail_node.h>
 #include <string>
-#include <global.h>
 
-namespace BT
-{
-  class ControlNode : public TreeNode
-  {
-    protected:
-      ReturnStatus execution_result;
-      void resetStatus(BT::TreeNode* node);
-    public:
-      ControlNode(std::string name,QPixmap icono_pixmap);
-      ~ControlNode();
-  };
+BT::RepeatFailNode::RepeatFailNode(std::string name,QPixmap icono_pixmap) : ControlNode::ControlNode(name, icono_pixmap) {
+  action=REPEAT_UNTIL_FAIL;
 }
-#endif
+
+BT::RepeatFailNode::~RepeatFailNode() {}
+
+BT::ReturnStatus BT::RepeatFailNode::executeStep()
+{
+  setColor(COLOR_BLUE);
+  number_of_children=children.size();
+  for(int i=0 ; i<number_of_children ; i++)
+  {
+    BT::ReturnStatus execution_result=children[i]->executeStep();
+    switch (execution_result)
+    {
+      //if the children success we have to reexecute it
+      case BT::SUCCESSFUL_COMPLETION:
+      
+        resetStatus(children[i]);
+        setStatus(BT::RUNNING);
+        return BT::RUNNING;
+        break;
+    
+      case BT::FAILURE_COMPLETION:
+        
+        setColor(COLOR_GREEN);
+        setStatus(BT::SUCCESSFUL_COMPLETION);
+        return BT::SUCCESSFUL_COMPLETION;
+        
+        break;
+        
+      case BT::RUNNING:
+        setStatus(BT::RUNNING);
+        return BT::RUNNING;
+      break;
+     
+      case BT::PAUSED:
+        setStatus(BT::PAUSED);
+        return BT::PAUSED;
+        break;
+      //default es aborted
+      default:
+        break;
+    }
+ }
+ return BT::SUCCESSFUL_COMPLETION;
+}

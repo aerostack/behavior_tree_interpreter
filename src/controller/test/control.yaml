@@ -1,0 +1,43 @@
+nodes:
+  - node: 1
+    name: Airplane inspection
+    type: control_flow
+    subtype: sequence
+    parent: 0
+
+  - node: 2
+    name: Despegue
+    type: execution
+    subtype: task
+    task: TAKE_OFF
+    wait_for_completion: false
+    parent: 1
+
+  - node: 3
+    name: Inverter
+    type: control_flow
+    subtype: inverter
+    parent: 1
+
+  - node: 4
+    name: Repeat
+    type: control_flow
+    subtype: repeater
+    parent: 3
+
+  - node: 5
+    name: Camino
+    type: execution
+    subtype: task
+    task: FOLLOW_PATH
+    parameters: "path: [[+X,+Y,+Z]]"
+    wait_for_completion: false
+    parent: 3
+
+  - node: 6
+    name: Aterriza
+    type: execution
+    subtype: task
+    task: LAND
+    wait_for_completion: false
+    parent: 1

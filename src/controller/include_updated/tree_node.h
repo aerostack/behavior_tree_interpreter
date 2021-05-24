@@ -78,7 +78,7 @@ namespace BT
   * "PAUSED" indicates that the node has been paused. 
   */
   enum ReturnStatus {RUNNING, SUCCESSFUL_COMPLETION, FAILURE_COMPLETION, NON_INITIATED, PAUSED, ABORTED};
-
+ 
   /*!
   * \enum NodeAction
   * We have six differente type of nodes.  
@@ -86,10 +86,16 @@ namespace BT
   * "REMOVE_BELIEF" it's an action_node that removes a belief to the memory of beliefs.
   * "QUERY_BELIEF" it's an action_node that asks a query to the memory of beliefs.
   * "BEHAVIOR_TASK" it's an action node that starts a task.
-  * "SEQUENCE_NODE" it's a control node.
-  * "FALLBACK_NODE" it's a control node. 
+  * "SEQUENCE_NODE" it's a control node, succeeds if every child success.
+  * "FALLBACK_NODE" it's a control node, succeeds if a child success.
+  * "INVERETER" it's a control node, succeeds if the only child fails.
+  * "PARALLEL" it's a control node with a threshold M, succeeds if N beign greater than M succceeds
+  * "REPEATER" it's a control node, execute n times a child
+  * "REPEAT_UNTIL_FAIL" it's a control node, execute a child until it fails.
+  * "SUCCEEDER" it's a control node, always returns success
+  *  
   */
-  enum NodeAction {ADD_BELIEF,REMOVE_BELIEF,QUERY_BELIEF,BEHAVIOR_TASK,SEQUENCE_NODE,FALLBACK_NODE};
+  enum NodeAction {ADD_BELIEF,REMOVE_BELIEF,QUERY_BELIEF,BEHAVIOR_TASK,SEQUENCE_NODE,FALLBACK_NODE,INVERTER,PARALLEL,REPEATER,REPEAT_UNTIL_FAIL,SUCCEEDER};
 
   /*! \class tree_node */
   class TreeNode : public QTreeWidgetItem
@@ -154,7 +160,7 @@ namespace BT
       std::string statusToString(ReturnStatus status);
 
       BT::TreeNode* modifyNode(std::string node_name, BT::NodeType node_type, BT::NodeAction ACTION_NODE, 
-        std::string behavior_type, std::string arguments, bool multivalued);  
+        std::string behavior_type, std::string arguments, bool multivalued, int times, int threshold);  
     
       void addChild(TreeNode* child);
       unsigned int GetChildrenNumber();

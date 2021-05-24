@@ -7,7 +7,7 @@ FileManager::FileManager()
 {
   ros::NodeHandle nh("~");
   nh.param<std::string>("robot_namespace", drone_id_namespace, "drone1");
-  nh.param<std::string>("catalog_path", behavior_catalog_path, "${AEROSTACK_PROJECT}/configs/mission/behavior_catalog.yaml");
+  nh.param<std::string>("catalog_path", behavior_catalog_path, "${APPLICATION_PATH}/configs/mission/behavior_catalog.yaml");
   nh.param<std::string>("consult_available_behaviors", consult_available_behaviors, "consult_available_behaviors");
   nh.param<std::string>("check_behavior_format_srv", check_behavior_format, "check_behavior_format");
 
@@ -51,8 +51,8 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
   std::map<int, int> map_parent;
 
   std::vector <std::string> node_types = {"CONTROL_FLOW", "EXECUTION"};
-  std::vector <std::string> node_subtype={"ADD_BELIEF","REMOVE_BELIEF","QUERY_BELIEF","TASK","SEQUENCE","FALLBACK"};
-
+  std::vector <std::string> node_subtype={"ADD_BELIEF","REMOVE_BELIEF","QUERY_BELIEF","TASK","SEQUENCE","FALLBACK","INVERTER","PARALLEL","REPEATER","REPEAT_UNTIL_FAIL","SUCCEEDER"};
+  std::vector <std::string> control_nodes={"SEQUENCE","FALLBACK","INVERTER","PARALLEL","REPEATER","REPEAT_UNTIL_FAIL","SUCCEEDER"};
   std::vector <std::string> task_no_params={"TAKE_OFF","LAND","HOVER","CLEAR_OCCUPANCY_GRID","PAY_ATTENTION_TO_QR_CODES","PAY_ATTENTION_TO_ROBOT_MESSAGES",
   "INFORM_POSITION_TO_ROBOTS"};
 
@@ -100,6 +100,8 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
         std::string task;
         bool wait_for_completion;
         bool multivalued;
+        int times;
+        int threshold;
         try
         {
           name = node["name"].as<std::string>(); 
@@ -118,8 +120,11 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
 
           typeaux = node["type"].as<std::string>();
           subtypeaaux = node["subtype"].as<std::string>(); 
-          
-          if(type==BT::CONTROL_NODE && (subtype!=BT::SEQUENCE_NODE && subtype!=BT::FALLBACK_NODE))
+          std::for_each(subtypeaaux.begin(), subtypeaaux.end(), [](char & c) 
+            {
+              c = ::toupper(c);
+            });
+          if(type==BT::CONTROL_NODE && std::find(control_nodes.begin(), control_nodes.end(), subtypeaaux) == control_nodes.end())
           {
             std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Incorrect type or subtype format" << "\n";
             error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
@@ -127,6 +132,7 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
             error_message.exec();
             return nullptr;
           }
+          
           if(type==BT::ACTION_NODE && subtype!=BT::ADD_BELIEF && subtype!=BT::REMOVE_BELIEF && subtype!=BT::QUERY_BELIEF && subtype!=BT::BEHAVIOR_TASK)
           {
             std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Incorrect type or subtype format" << "\n";
@@ -146,6 +152,28 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
         }
         if(type==BT::ACTION_NODE)
         {
+          try
+          {
+            times = node["times"].as<int>();
+            std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Action nodes do not have time parameter" << "\n";
+            error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+            error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nAction nodes do not have time parameter."));
+            error_message.exec();
+            return nullptr; 
+          }
+          catch(const std::exception& e){}
+
+          try
+          {
+            threshold = node["threshold"].as<int>();
+            std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Parallel do not have threshold parameter" << "\n";
+            error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+            error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Parallel do not have threshold parameter."));
+            error_message.exec();
+            return nullptr; 
+          }
+          catch(const std::exception& e){}
+
           if(subtype==BT::ADD_BELIEF)
           {
             try
@@ -336,10 +364,67 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
             return nullptr; 
           }
           catch(const std::exception& e){}
+          if(subtype==BT::REPEATER)
+          {
+            try
+            {
+              times = node["times"].as<int>(); 
+            }
+            catch(const std::exception& e)
+            {
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Repeater node need an integer argument named times " << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nRepeater node need an integer argument named times "));
+              error_message.exec();
+              return nullptr;
+            }
+          }
+          else
+          {
+            try
+            {
+              times = node["times"].as<int>();
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Repeater do not have time parameter" << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Repeater do not have time parameter."));
+              error_message.exec();
+              return nullptr; 
+            }
+            catch(const std::exception& e){}
+          }
+          if(subtype==BT::PARALLEL)
+          {
+            try
+            {
+              threshold = node["threshold"].as<int>(); 
+            }
+            catch(const std::exception& e)
+            {
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Parallel node need an integer argument named threshold " << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nParallel node need an integer argument named threshold "));
+              error_message.exec();
+              return nullptr;
+            }
+          }
+          else
+          {
+            try
+            {
+              threshold = node["threshold"].as<int>();
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Parallel do not have threshold parameter" << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Parallel do not have threshold parameter."));
+              error_message.exec();
+              return nullptr; 
+            }
+            catch(const std::exception& e){}
+          }
+          
         }
         
         
-        BT::TreeNode* real_node=item->modifyNode(name, type, subtype, task, parameters,multivalued);
+        BT::TreeNode* real_node=item->modifyNode(name, type, subtype, task, parameters,multivalued,times,threshold);
         m[node_id] = real_node;
         map_parent[node_id] = parent;
       } 
@@ -357,6 +442,8 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
         std::string task;
         bool wait_for_completion;
         bool multivalued;
+        int times;
+        int threshold;
         try
         {
           node_id = node["node"].as<int>();
@@ -387,8 +474,11 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
 
           typeaux = node["type"].as<std::string>();
           subtypeaaux = node["subtype"].as<std::string>(); 
-          
-          if(type==BT::CONTROL_NODE && (subtype!=BT::SEQUENCE_NODE && subtype!=BT::FALLBACK_NODE))
+          std::for_each(subtypeaaux.begin(), subtypeaaux.end(), [](char & c) 
+            {
+              c = ::toupper(c);
+            });
+          if(type==BT::CONTROL_NODE && std::find(control_nodes.begin(), control_nodes.end(), subtypeaaux) == control_nodes.end())
           {
             std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Incorrect type or subtype format" << "\n";
             error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
@@ -415,6 +505,28 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
         }
         if(type==BT::ACTION_NODE)
         {
+          try
+          {
+            times = node["times"].as<int>();
+            std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Action nodes do not have time parameter" << "\n";
+            error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+            error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nAction nodes do not have time parameter."));
+            error_message.exec();
+            return nullptr; 
+          }
+          catch(const std::exception& e){}
+
+          try
+          {
+            threshold = node["threshold"].as<int>();
+            std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Parallel do not have threshold parameter" << "\n";
+            error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+            error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Parallel do not have threshold parameter."));
+            error_message.exec();
+            return nullptr; 
+          }
+          catch(const std::exception& e){}
+
           if(subtype==BT::ADD_BELIEF)
           {
             try
@@ -449,6 +561,7 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
             try
             {
               task = node["task"].as<std::string>();
+              
               if(std::find(available_behaviors.begin(), available_behaviors.end(), task) == available_behaviors.end())
               {
                 for (int i = 0; i < available_behaviors.size(); i++) 
@@ -560,6 +673,7 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
               error_message.exec();
               return nullptr;
             }
+            
           }
         }
         else if(type==BT::CONTROL_NODE)
@@ -605,24 +719,107 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
             return nullptr; 
           }
           catch(const std::exception& e){}
+          if(subtype==BT::REPEATER)
+          {
+            try
+            {
+              times = node["times"].as<int>(); 
+            }
+            catch(const std::exception& e)
+            {
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Repeater node need an integer argument named times " << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nRepeater node need an integer argument named times "));
+              error_message.exec();
+              return nullptr;
+            }
+          }
+          else
+          {
+            try
+            {
+              times = node["times"].as<int>();
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Repeater do not have time parameter" << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Repeater do not have time parameter."));
+              error_message.exec();
+              return nullptr; 
+            }
+            catch(const std::exception& e){}
+          }
+          if(subtype==BT::PARALLEL)
+          {
+            try
+            {
+              threshold = node["threshold"].as<int>(); 
+            }
+            catch(const std::exception& e)
+            {
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Parallel node need an integer argument named threshold " << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nParallel node need an integer argument named threshold "));
+              error_message.exec();
+              return nullptr;
+            }
+          }
+          else
+          {
+            try
+            {
+              threshold = node["threshold"].as<int>();
+              std::cout << "Wrong format of behavior tree in file \"" << load_route << "\"\nNode " << std::to_string(i+1) << "\n" << "Control nodes different from Parallel do not have threshold parameter" << "\n";
+              error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+              error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Parallel do not have threshold parameter."));
+              error_message.exec();
+              return nullptr; 
+            }
+            catch(const std::exception& e){}
+          }
         }
         
-        BT::TreeNode* real_node=item->modifyNode(name, type, subtype, task, parameters, multivalued); 
+        BT::TreeNode* real_node=item->modifyNode(name, type, subtype, task, parameters, multivalued,times,threshold); 
         m[node_id] = real_node;
         map_parent[node_id] = parent;
       }
     }
+    
+    //Key is node_id value is number of children
+    std::map<int, int> children;
     for (const auto& kv : map_parent) 
     {
       if (kv.second == 0) 
       {
         m[kv.first]->setHasParent(false);
         root = m[kv.first];
+        children[kv.first]=0;
       }
       else 
       {
         m[kv.second]->addChild(m[kv.first]);
+        children[kv.second]++;
       }
+    }
+    
+    int error_code=checkChildNumber(m,children);
+    if(error_code!=0)
+    {
+      if(error_code==1)
+      {
+        std::cout << "Wrong format of behavior tree in file \"" << load_route  << "Control nodes different from Sequence, Parallel or Fallback only have one child" << "\n";
+        error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+        error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nControl nodes different from Sequence, Parallel or Fallback only have one child."));
+        error_message.exec();
+        return nullptr; 
+      }
+      else
+      {
+        std::cout << "Wrong format of behavior tree in file \"" << load_route  << "Parallel nodes threshold can't be greater than the number of children" << "\n";
+        error_message.setWindowTitle(QString::fromStdString("Loading mission error"));
+        error_message.setText(QString::fromStdString("Unable to import mission plan.\nWrong format of behavior tree in file "+ load_route + "."+"\nParallel nodes threshold can't be greater than the number of children."));
+        error_message.exec();
+        return nullptr;
+      }
+      
     }
     return root;
   } 
@@ -635,14 +832,40 @@ BT::TreeNode* FileManager::loadTree(std::string load_route)
   }
 }
 
+int FileManager::checkChildNumber(std::map<int, BT::TreeNode*> m,std::map<int, int> children)
+{
+  int cond=0;
+  for (const auto& kv : children )
+  {
+    if(cond==0)
+    {
+      BT::NodeAction action = m[kv.first]->getAction();
+      if( action==BT::INVERTER || action==BT::SUCCEEDER || action==BT::REPEATER || action==BT::REPEAT_UNTIL_FAIL )
+      {
+        if(kv.second>1)
+          cond=1;
+      }
+      else if ( action==BT::PARALLEL )
+      {
+        BT::ParallelNode * node = dynamic_cast<BT::ParallelNode*>(m[kv.first]);
+        if(node->getThreshold()>node->GetChildrenNumber())
+          cond=2;
+      }
+    }
+    else
+    {
+      break;
+    }
+  }
+  return cond;
+}
 bool FileManager::loadConfiguration(std::string file_path)
 { 
-  std::cout<<"Catalog: "<<file_path<<std::endl;
+  std::cout <<"Catalog: "<<file_path<<std::endl;
 
 try{
 	  YAML::Node yaml_node;
-  yaml_node = YAML::LoadFile(file_path);
-  
+    yaml_node = YAML::LoadFile(file_path);
   if (yaml_node["tasks"]){
   	for (YAML::const_iterator tasksi=yaml_node["tasks"].begin();tasksi!=yaml_node["tasks"].end();++tasksi) 
     {

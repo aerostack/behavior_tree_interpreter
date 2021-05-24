@@ -1,5 +1,5 @@
 /*!********************************************************************************
- * \brief     This is the header of the control_node class 
+ * \brief     This is the header of the parallel_node class 
  * \authors   Oscar Cabrera
  * \copyright Copyright (c) 2020 Universidad Politecnica de Madrid
  *
@@ -27,25 +27,26 @@
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************/
-#ifndef CONTROL_NODE_H
-#define CONTROL_NODE_H
+#ifndef PARALLEL_NODE_H
+#define PARALLEL_NODE_H
 
-#include <tree_node.h>
-
-#include <vector>
+#include <control_node.h>
 #include <string>
-#include <global.h>
+#include <thread>
 
 namespace BT
 {
-  class ControlNode : public TreeNode
-  {
-    protected:
-      ReturnStatus execution_result;
-      void resetStatus(BT::TreeNode* node);
-    public:
-      ControlNode(std::string name,QPixmap icono_pixmap);
-      ~ControlNode();
-  };
+class ParallelNode : public ControlNode
+{
+public:
+  explicit ParallelNode(std::string name,int threshold, QPixmap icono_pixmap);
+  ~ParallelNode();
+  int getThreshold();
+  
+  BT::ReturnStatus executeStep();
+private: 
+  int threshold;
+  std::vector <std::thread*> executing_threads;
+};
 }
 #endif
