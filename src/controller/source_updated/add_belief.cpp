@@ -56,9 +56,7 @@ BT::AddBelief::AddBelief(std::string name, std::string belief_expression , bool 
 BT::AddBelief::~AddBelief(){}
 
 BT::ReturnStatus BT::AddBelief::executeStep()
-{
-  //sleep(2);
-  
+{  
   if(status==BT::NON_INITIATED || status==BT::FAILURE_COMPLETION)
   {
     setColor(COLOR_BLUE);

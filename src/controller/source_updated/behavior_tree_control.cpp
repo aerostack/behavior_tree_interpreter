@@ -458,7 +458,6 @@ void BehaviorTreeControl::executeTreeMission()//this method executes the mission
   //we need to check if it is the first time the mission is executed
   if(root_node->getStatus()!=BT::NON_INITIATED)
   { 
-    std::cout << "entra y limpia arbol y running nodes \n";
     cleanTree();
     deleteRunningNodes();
     tree->disconnectCustomContextMenu();
@@ -472,7 +471,6 @@ void BehaviorTreeControl::executeTreeMission()//this method executes the mission
   }
   else
   {
-    std::cout<< "ejecuto sin limpiar arbol \n";
     tree->disconnectCustomContextMenu();
     doneFirst=false;
     Q_EMIT(executionStarted());
@@ -500,7 +498,6 @@ void BehaviorTreeControl::executeTreeFromItem(BT::TreeNode * item_to_execute)
   if(aborted)
   {
     itemPaused->setisAborted(true);
-    std::cout<<"pongo status \n";    
     aborted=false;
     resetTreeStatus(root_node);
     //poner subarbol a nuevo estado de no ejecucion
@@ -509,7 +506,6 @@ void BehaviorTreeControl::executeTreeFromItem(BT::TreeNode * item_to_execute)
   }
   else if(paused){
     itemPaused->setisAborted(true);
-    std::cout<<"pongo status \n";    
     aborted=false;
     resetTreeStatus(root_node);
     //poner subarbol a nuevo estado de no ejecucion
@@ -547,7 +543,6 @@ void BehaviorTreeControl::pauseMission(){
       BT::BehaviorTree * myTree = this->tree;
       tree->setRunning(false);  
       myTree->cancelTree();
-      std::cout << "item paused" << itemPaused->getName() << " no iniciado \n";
       itemPaused->setStatus(BT::NON_INITIATED);
       itemPaused->setColor(COLOR_GRAY);
       paused=true;
@@ -618,17 +613,14 @@ void BehaviorTreeControl::completedMission()
 }
 void BehaviorTreeControl::missionFailed()
 {
-  std::cout << visualState << "\n";
   mission_failed=true;
   resetTreeStatus(root_node);
   tree->connectCustomContextMenu();
 
-  std::cout << visualState << "\n";
   setStopBlockingTextInput();
   variables->deleteVariables();
   cleanVariableText();
 
-  std::cout << visualState << "\n";
 }
 
 void BehaviorTreeControl::cleanTree(){//this method changes the state of the nodes to the non initiated state in order to repeat the mission
@@ -671,9 +663,7 @@ void BehaviorTreeControl::deletePauseNode()
   {
     if(!running_nodes[i]->getName().compare(itemPaused->getName()))
     { 
-      std::cout << running_nodes[i]->getName() << "\n";
       BT::TreeNode* node=running_nodes[i];
-      std::cout << node->getName() << "\n";
       running_nodes.erase(running_nodes.begin()+i);
     }
   }
@@ -687,12 +677,10 @@ bool BehaviorTreeControl::setAbortedItems(BT::TreeNode* node)
   {
     if(!children[i]->getName().compare(itemPaused->getName()) && children[i]->getisAborted())
     {
-      std::cout << "no pongo aborted a" << children[i]->getName() << "\n";
       exit=true;
     }
     else
     {
-      std::cout << "pongo a aborted" << children[i]->getName() << "\n";
       children[i]->setStatus(BT::ABORTED);
     }
     if(!children[i]->getChildren().empty())
@@ -1192,7 +1180,6 @@ void BehaviorTreeControl::CallbackBehaviorActivationFinished(const behavior_coor
       {
         if(termination_cause!=behavior_coordinator_msgs::TaskStopped::INTERRUPTED)  
         {
-          std::cout << "esta coloreando por esto?"<< running_nodes[i]->getName()<<termination_cause<<"\n";
           running_nodes[i]->setStatus(BT::FAILURE_COMPLETION);
           running_nodes[i]->setColor(COLOR_RED);
           running_nodes.erase(running_nodes.begin()+i);

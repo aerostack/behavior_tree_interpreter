@@ -128,7 +128,6 @@ void BT::BehaviorTree::execute(BT::TreeNode* root, int TickPeriod_milliseconds)
    
    if(paused)
 	{
-	  std::cout<<"ejecutando item"<<itemPaused->getName()<<"\n";
 	  status=itemPaused->executeStep();
 	  paused=false;
 	}
@@ -138,13 +137,11 @@ void BT::BehaviorTree::execute(BT::TreeNode* root, int TickPeriod_milliseconds)
 	}
 	if(status==BT::SUCCESSFUL_COMPLETION)
 	{
-	  std::cout << "esta true y acaba \n";
 	  stopMission=true;
 	  Q_EMIT(missionFinishedCorrectly());
 	}
 	if(status==BT::FAILURE_COMPLETION)
 	{
-	  std::cout << "ha fallado \n";
 	  stopMission=true;
 	  Q_EMIT(missionFinishedFailure());
 	}

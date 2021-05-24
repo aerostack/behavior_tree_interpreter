@@ -74,9 +74,7 @@ std::string Variables::getValues()
     //double to string strs.str()
     value << pair.second;
     std::string key(1,pair.first);
-    std::cout << value.str() << key << "\n";
     res=res+"\n"+key+":"+value.str(); 
-    std::cout << res << "\n";
   }
   return res;
 }
