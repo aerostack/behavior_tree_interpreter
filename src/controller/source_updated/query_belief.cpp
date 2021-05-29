@@ -54,17 +54,20 @@ BT::ReturnStatus BT::QueryBelief::executeStep()
   {
     itemPaused=this;
     setColor(COLOR_BLUE);
+      setColorBackground("#ffffff");
     sleep(2);
     bool activation_result=askQueryBelief();
     if(activation_result)
     {
       setColor(COLOR_GREEN);
+      setColorBackground("#ffffff");
       status=BT::SUCCESSFUL_COMPLETION;
     }
       
     else
     {
       setColor(COLOR_RED);
+      setColorBackground("#ffffff");
       status=BT::FAILURE_COMPLETION;
     }
       

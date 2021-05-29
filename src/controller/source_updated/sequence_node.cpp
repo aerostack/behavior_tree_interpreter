@@ -41,7 +41,7 @@ BT::SequenceNode::~SequenceNode() {}
 
 BT::ReturnStatus BT::SequenceNode::executeStep()
 {
-  setColor(COLOR_BLUE);
+
   number_of_children=children.size();
   for(int i=0 ; i<number_of_children ; i++)
   {
@@ -56,6 +56,8 @@ BT::ReturnStatus BT::SequenceNode::executeStep()
       {
         setColor(COLOR_GREEN);
         setStatus(BT::SUCCESSFUL_COMPLETION);
+        if(this->getHasParent())
+          setChildrenColorBlack();
         return BT::SUCCESSFUL_COMPLETION;
       }
       break;

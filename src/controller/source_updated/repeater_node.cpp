@@ -42,8 +42,6 @@ BT::RepeaterNode::~RepeaterNode() {}
 
 BT::ReturnStatus BT::RepeaterNode::executeStep()
 {
-  
-  setColor(COLOR_BLUE);
   number_of_children=children.size();
   
   for(int i=0 ; i<number_of_children ; i++)

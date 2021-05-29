@@ -43,6 +43,7 @@ namespace BT
     protected:
       ReturnStatus execution_result;
       void resetStatus(BT::TreeNode* node);
+      void setChildrenColorBlack();
     public:
       ControlNode(std::string name,QPixmap icono_pixmap);
       ~ControlNode();

@@ -58,7 +58,8 @@ BT::ReturnStatus BT::BehaviorTask::executeStep()
   
   if(status==NON_INITIATED || status==BT::FAILURE_COMPLETION) 
   {
-    setColor(COLOR_BLUE);
+    setColorBackground(COLOR_BLUE);
+    setColor("#ffffff");
     itemPaused=this;
     /*If activation_result.ack=true the service was succcesfully launched but it is not completed
     * until we recieved the confirmation from the callback function
@@ -72,6 +73,7 @@ BT::ReturnStatus BT::BehaviorTask::executeStep()
     {
       std::cout<< activation_result.error_message;
       setColor(COLOR_RED);
+      setColorBackground("#ffffff");
       status=FAILURE_COMPLETION;
     }
   }

@@ -55,3 +55,14 @@ void BT::ControlNode::resetStatus(BT::TreeNode* node)
     nodes[i]->setStatus(BT::NON_INITIATED);
   }
 }
+
+void BT::ControlNode::setChildrenColorBlack()
+{
+  number_of_children=children.size();
+  for(int i=0 ; i<number_of_children ; i++)
+  {
+    children[i]->setColor(COLOR_BLACK);
+    children[i]->setColorBackground("#ffffff");
+  }
+
+}

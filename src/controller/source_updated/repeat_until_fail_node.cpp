@@ -40,7 +40,6 @@ BT::RepeatFailNode::~RepeatFailNode() {}
 
 BT::ReturnStatus BT::RepeatFailNode::executeStep()
 {
-  setColor(COLOR_BLUE);
   number_of_children=children.size();
   for(int i=0 ; i<number_of_children ; i++)
   {

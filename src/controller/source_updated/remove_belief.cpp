@@ -54,17 +54,20 @@ BT::ReturnStatus BT::RemoveBelief::executeStep()
   {
     itemPaused=this;
     setColor(COLOR_BLUE);
+      setColorBackground("#ffffff");
     sleep(2);
     bool activation_result=removeBelief();
     if(activation_result)
     {
       setColor(COLOR_GREEN);
+      setColorBackground("#ffffff");
       status=BT::SUCCESSFUL_COMPLETION;
     }
       
     else
     {
       setColor(COLOR_RED);
+      setColorBackground("#ffffff");
       status=BT::FAILURE_COMPLETION;
     }
       
@@ -133,7 +136,6 @@ std::string BT::RemoveBelief::substitutionVariables(std::string parameters)
 {
   std::string substitution=parameters;
   std::string aux1,aux2;
-  std::cout << substitution << "\n";
   for(int i=0 ; i<substitution.size()  ; i++)
   {
     if(substitution[i]=='+')
@@ -148,6 +150,5 @@ std::string BT::RemoveBelief::substitutionVariables(std::string parameters)
       substitution=aux1;
     }
   }
-  std::cout<<substitution<<"\n";
   return substitution;
 }

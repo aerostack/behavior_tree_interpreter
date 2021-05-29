@@ -59,18 +59,21 @@ BT::ReturnStatus BT::AddBelief::executeStep()
 {  
   if(status==BT::NON_INITIATED || status==BT::FAILURE_COMPLETION)
   {
-    setColor(COLOR_BLUE);
+    setColorBackground(COLOR_BLUE);
+    setColor("#ffffff");
     itemPaused=this;
     bool activation_result=addBelief();
     /*If activation_result=true the service was succesfully completed otherwise it was a failure completion*/
     if(activation_result)
     {
       setColor(COLOR_GREEN);
+      setColorBackground("#ffffff");
       status=BT::SUCCESSFUL_COMPLETION;
     }
     else
     {
       setColor(COLOR_RED);
+      setColorBackground("#ffffff");
       status=BT::FAILURE_COMPLETION;
     }
   }

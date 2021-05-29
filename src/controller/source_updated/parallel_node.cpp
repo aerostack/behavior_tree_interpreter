@@ -43,11 +43,10 @@ BT::ParallelNode::~ParallelNode() {}
 
 BT::ReturnStatus BT::ParallelNode::executeStep()
 {
-  setColor(COLOR_BLUE);
   number_of_children=children.size();
   for (int i=0 ; i<number_of_children; i++)
   {
-    //executing_threads.push_back(new std::thread(&BT::TreeNode::executeStep,children[i]));
+    //executing_threads.push_back(new std::thread(&BT::TreeNode::executeStep,children[i])); std::thread()
     children[i]->executeStep();
   }
 

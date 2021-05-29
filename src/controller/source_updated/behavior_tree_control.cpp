@@ -407,6 +407,7 @@ void BehaviorTreeControl::landTreeMission()
     if (visualState==3 || visualState==2 )//if (paused)
     {
       itemPaused->setColor(COLOR_RED);
+      itemPaused->setColorBackground("#ffffff");
     }
     visualState=0;
     lastVisualState=0;
@@ -414,6 +415,7 @@ void BehaviorTreeControl::landTreeMission()
     if (visualState==5 ||visualState==7)
     {
       itemPaused->setColor(COLOR_RED);
+      itemPaused->setColorBackground("#ffffff");
     }
   }
 
@@ -426,6 +428,7 @@ void BehaviorTreeControl::landTreeMission()
   tree->connectCustomContextMenu();
   deleteRunningNodes();
   itemPaused->setColor(COLOR_RED);
+  itemPaused->setColorBackground("#ffffff");
   setStopBlockingTextInput();
   variables->deleteVariables();
   cleanVariableText();
@@ -464,6 +467,7 @@ void BehaviorTreeControl::executeTreeMission()//this method executes the mission
     doneFirst=false;
     Q_EMIT(executionStarted());
     root_node->setColor(COLOR_BLACK);
+    root_node->setColorBackground("#ffffff");
     executing_tree= new std::thread(&BT::BehaviorTree::execute,tree,root_node,2000);
     tree->setRunning(true);
     missionStateMsgs.data=true;
@@ -475,6 +479,7 @@ void BehaviorTreeControl::executeTreeMission()//this method executes the mission
     doneFirst=false;
     Q_EMIT(executionStarted());
     root_node->setColor(COLOR_BLACK);
+    root_node->setColorBackground("#ffffff");
     executing_tree= new std::thread(&BT::BehaviorTree::execute,tree,root_node,2000);
     tree->setRunning(true);
     missionStateMsgs.data=true;
@@ -485,11 +490,9 @@ void BehaviorTreeControl::executeTreeMission()//this method executes the mission
 void BehaviorTreeControl::executeTreeFromItem(BT::TreeNode * item_to_execute)
 {
   addTextVariables();
-  if(completed_mission || mission_failed)
-  {
-    cleanTree();
-  }
-
+  
+  cleanTree();
+  
   completed_mission=false;
   itemPaused=item_to_execute;
   stopMission=false;
@@ -516,6 +519,7 @@ void BehaviorTreeControl::executeTreeFromItem(BT::TreeNode * item_to_execute)
   doneFirst=false;
   Q_EMIT(executionStarted());
   root_node->setColor(COLOR_BLACK);
+  root_node->setColorBackground("#ffffff");
   executing_tree= new std::thread(&BT::BehaviorTree::execute,tree,root_node,2000);
   tree->setRunning(true);
   missionStateMsgs.data=true;
@@ -544,7 +548,8 @@ void BehaviorTreeControl::pauseMission(){
       tree->setRunning(false);  
       myTree->cancelTree();
       itemPaused->setStatus(BT::NON_INITIATED);
-      itemPaused->setColor(COLOR_GRAY);
+      itemPaused->setColorBackground(COLOR_GRAY);
+      itemPaused->setColor("#ffffff");
       paused=true;
     }
     deletePauseNode();
@@ -589,6 +594,7 @@ void BehaviorTreeControl::abortTreeMission()
   }
   //paint respective node and allow variables input
   itemPaused->setColor(COLOR_PURPLE);
+  itemPaused->setColorBackground("#ffffff");
   resetTreeStatus(root_node);
   lastVisualState= visualState;
   visualState=2;
@@ -630,7 +636,9 @@ void BehaviorTreeControl::cleanTree(){//this method changes the state of the nod
 void BehaviorTreeControl::resetTreeColor(BT::TreeNode* node)
 {
   itemPaused->setColor(COLOR_BLACK);
+  itemPaused->setColorBackground("#ffffff");
   root_node->setColor(COLOR_BLACK);
+  root_node->setColorBackground("#ffffff");
   std::vector<BT::TreeNode*> nodes =node->getChildren();
   for(int i=0 ; i<nodes.size() ; i++)
   {
@@ -639,6 +647,7 @@ void BehaviorTreeControl::resetTreeColor(BT::TreeNode* node)
       resetTreeColor(nodes[i]);
     }
     nodes[i]->setColor(COLOR_BLACK);
+    root_node->setColorBackground("#ffffff");
   }
 }
 
@@ -1174,6 +1183,7 @@ void BehaviorTreeControl::CallbackBehaviorActivationFinished(const behavior_coor
       {
         running_nodes[i]->setStatus(BT::SUCCESSFUL_COMPLETION);
 		    running_nodes[i]->setColor(COLOR_GREEN);
+        running_nodes[i]->setColorBackground("#ffffff");
         running_nodes.erase(running_nodes.begin()+i);
       }
       else
@@ -1182,6 +1192,7 @@ void BehaviorTreeControl::CallbackBehaviorActivationFinished(const behavior_coor
         {
           running_nodes[i]->setStatus(BT::FAILURE_COMPLETION);
           running_nodes[i]->setColor(COLOR_RED);
+          running_nodes[i]->setColorBackground("#ffffff");
           running_nodes.erase(running_nodes.begin()+i);
         }
       }
