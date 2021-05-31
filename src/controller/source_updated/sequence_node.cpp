@@ -56,8 +56,6 @@ BT::ReturnStatus BT::SequenceNode::executeStep()
       {
         setColor(COLOR_GREEN);
         setStatus(BT::SUCCESSFUL_COMPLETION);
-        if(this->getHasParent())
-          setChildrenColorBlack();
         return BT::SUCCESSFUL_COMPLETION;
       }
       break;
