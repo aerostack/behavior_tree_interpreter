@@ -24,6 +24,8 @@
   <build_depend>behavior_execution_manager_msgs</build_depend>
   <build_depend>behavior_coordinator_msgs</build_depend>
   <build_depend>yaml-cpp</build_depend>
+  <build_depend>belief_manager_msgs</build_depend>
+
   <run_depend>aerostack_msgs</run_depend>
   <run_depend>behavior_execution_manager_msgs</run_depend>
   <run_depend>behavior_coordinator_msgs</run_depend>
@@ -38,5 +40,5 @@
   <run_depend>angles</run_depend>
   <run_depend>pugixml</run_depend>
   <run_depend>yaml-cpp</run_depend>
-  <build_depend>message_generation</build_depend>
+  <run_depend>belief_manager_msgs</run_depend>
 </package>
