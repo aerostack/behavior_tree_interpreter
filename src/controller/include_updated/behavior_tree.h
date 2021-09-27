@@ -45,7 +45,7 @@
 #include <chrono>
 #include <future>
 
-
+#include <QHeaderView>
 #include <QTreeWidget>
 #include <QWidget>
 #include <QTreeWidgetItem>
